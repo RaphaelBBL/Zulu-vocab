@@ -1,0 +1,23 @@
+# dependencies
+node_modules
+package-lock.json.bak
+
+# build output
+dist
+dist-ssr
+
+# local env (KEEP YOUR KEYS OUT OF GIT)
+.env
+.env.local
+.env.*.local
+
+# logs
+*.log
+npm-debug.log*
+
+# editor / os
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea
+Thumbs.db
