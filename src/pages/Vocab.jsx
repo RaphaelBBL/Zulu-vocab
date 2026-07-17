@@ -32,21 +32,21 @@ export default function Vocab() {
   return (
     <div>
       <div className="row between">
-        <h1>Vocabulary</h1>
+        <h1 className="display">Words</h1>
         <span className="chip">{words.length} words</span>
       </div>
       <p className="subtitle">Browse, edit and build your word lists. Everything you add is saved on this device.</p>
 
       <div className="row mb" style={{ gap: 8 }}>
-        <button className="btn sm" onClick={() => setEditing('new')}>➕ Add word</button>
-        <button className="btn sm subtle" onClick={() => setShowCat(true)}>🗂️ New list</button>
-        <button className="btn sm subtle" onClick={() => setShowImport(true)}>📥 Import</button>
-        <button className="btn sm ghost" onClick={restoreStarter} title="Re-add any missing starter words">↺ Restore starter</button>
+        <button className="btn sm" onClick={() => setEditing('new')}>Add word</button>
+        <button className="btn sm subtle" onClick={() => setShowCat(true)}>New list</button>
+        <button className="btn sm subtle" onClick={() => setShowImport(true)}>Import</button>
+        <button className="btn sm ghost" onClick={restoreStarter} title="Re-add any missing starter words">Restore starter</button>
       </div>
 
       <input
         className="mb"
-        placeholder="🔍 Search isiZulu or English…"
+        placeholder="Search isiZulu or English…"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
@@ -86,7 +86,7 @@ export default function Vocab() {
       )}
 
       <div className="card" style={{ padding: 4 }}>
-        {visible.length === 0 && <div className="empty">No words here yet. Add some! 🌱</div>}
+        {visible.length === 0 && <div className="empty">No words here yet.</div>}
         {visible.map((w) => (
           <div className="word" key={w.id}>
             <div className="spread">
@@ -99,13 +99,13 @@ export default function Vocab() {
               {filter === 'all' && <div className="small muted" style={{ marginTop: 2 }}>{catName(w.category)}</div>}
             </div>
             <div className="actions">
-              <button className="icon-btn" title="Edit" onClick={() => setEditing(w)}>✏️</button>
+              <button className="icon-btn" title="Edit" onClick={() => setEditing(w)}>✎</button>
               <button
                 className="icon-btn"
                 title="Delete"
                 onClick={() => { if (confirm(`Delete "${w.isizulu}"?`)) deleteWord(w.id) }}
               >
-                🗑️
+                ✕
               </button>
             </div>
           </div>
@@ -144,7 +144,7 @@ export default function Vocab() {
           onImport={(rows, category) => {
             const n = importWords(rows, category)
             setShowImport(false)
-            if (n) { setFilter(category); alert(`Imported ${n} word${n !== 1 ? 's' : ''}. 🎉`) }
+            if (n) { setFilter(category); alert(`Imported ${n} word${n !== 1 ? 's' : ''}.`) }
             else alert('No valid rows found. Use: isiZulu, English (one per line).')
           }}
           onAddCategory={addCategory}

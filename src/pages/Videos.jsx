@@ -13,8 +13,8 @@ export default function Videos() {
   return (
     <div>
       <div className="row between">
-        <h1>Videos ▶️</h1>
-        <button className="btn sm" onClick={() => setShowAdd(true)}>➕ Add video</button>
+        <h1 className="display">Videos</h1>
+        <button className="btn sm" onClick={() => setShowAdd(true)}>Add video</button>
       </div>
       <p className="subtitle">
         Attach YouTube clips to each topic for pronunciation and lessons. Paste a
@@ -22,7 +22,7 @@ export default function Videos() {
       </p>
 
       <div className="notice mb">
-        💡 Good things to search on YouTube:{' '}
+        Good things to search on YouTube:{' '}
         {VIDEO_SEARCH_HINTS.map((h, i) => (
           <span key={h}>
             <a href={`https://www.youtube.com/results?search_query=${encodeURIComponent(h)}`} target="_blank" rel="noreferrer">“{h}”</a>
@@ -47,7 +47,7 @@ export default function Videos() {
       })}
 
       {videos.length === 0 && (
-        <div className="empty">No videos yet. Add one with the button above! 🎬</div>
+        <div className="empty">No videos yet. Add one with the button above.</div>
       )}
 
       {showAdd && (

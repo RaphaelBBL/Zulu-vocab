@@ -16,8 +16,8 @@ export default function Dashboard({ go }) {
 
   return (
     <div>
-      <h1>Sawubona{displayName ? `, ${displayName}` : ''}! 👋</h1>
-      <p className="subtitle">Here's how your isiZulu is coming along.</p>
+      <h1 className="display">Sawubona{displayName ? `, ${displayName}` : ''}.</h1>
+      <p className="subtitle">Where your isiZulu stands today.</p>
 
       <div className="grid cols-3 mb">
         <div className="card stat">
@@ -33,7 +33,7 @@ export default function Dashboard({ go }) {
           <div className="lbl">Accuracy</div>
         </div>
         <div className="card stat red">
-          <div className="num">{progress.streak}🔥</div>
+          <div className="num">{progress.streak}</div>
           <div className="lbl">Day streak</div>
         </div>
         <div className="card stat">
@@ -48,18 +48,18 @@ export default function Dashboard({ go }) {
 
       <div className="row mb" style={{ gap: 10 }}>
         <button className="btn gold spread" onClick={() => go('quiz')}>
-          ✏️ Start a quiz
+          Start a quiz
         </button>
         {troubleWords.length > 0 && (
           <button className="btn danger spread" onClick={() => go('quiz')}>
-            🩹 Review {troubleWords.length} mistake{troubleWords.length > 1 ? 's' : ''}
+            Review {troubleWords.length} mistake{troubleWords.length > 1 ? 's' : ''}
           </button>
         )}
       </div>
 
       <h2>Mastery by category</h2>
       <div className="card">
-        {categories.length === 0 && <div className="empty">No categories yet — add some in the Vocab tab.</div>}
+        {categories.length === 0 && <div className="empty">No categories yet — add some in the Words tab.</div>}
         {categories.map((c) => {
           const m = masteryByCategory[c.id] || { pct: 0, total: 0, seen: 0 }
           return (
@@ -78,8 +78,8 @@ export default function Dashboard({ go }) {
         })}
       </div>
 
-      <p className="center muted small mt">
-        Ukuqhubeka kuyimpumelelo — keep going, consistency wins! 🌟
+      <p className="center muted small mt" style={{ fontStyle: 'italic' }}>
+        “Ukuqhubeka kuyimpumelelo” — persistence brings success.
       </p>
     </div>
   )

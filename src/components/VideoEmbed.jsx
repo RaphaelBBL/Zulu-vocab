@@ -25,7 +25,7 @@ export default function VideoEmbed({ video, onDelete }) {
       <div className="row between mb">
         <b style={{ fontSize: '0.95rem' }}>{video.title}</b>
         {onDelete && (
-          <button className="icon-btn" title="Remove" onClick={onDelete}>🗑️</button>
+          <button className="icon-btn" title="Remove" onClick={onDelete}>✕</button>
         )}
       </div>
       {id ? (
@@ -40,7 +40,7 @@ export default function VideoEmbed({ video, onDelete }) {
         </div>
       ) : (
         <a className="video-link" href={video.youtubeUrl} target="_blank" rel="noreferrer">
-          🔎 Open on YouTube ↗
+          Open on YouTube ↗
           <div className="small muted" style={{ fontWeight: 400, marginTop: 4 }}>
             This is a search/playlist link — paste a single video URL to embed it here.
           </div>

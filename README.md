@@ -98,12 +98,14 @@ works — the Leaderboard tab just shows a “not connected yet” message.
 - Pick a name and a database password (save it somewhere), choose the free plan,
   and wait ~1 minute for it to provision.
 
-**2. Create the `scores` table**
+**2. Create the tables**
 - In your project, open the **SQL Editor** → **New query**, paste this and click
-  **Run**:
+  **Run**. (If you already created `scores` earlier, this safely adds the new
+  bits — run the whole thing again.)
 
 ```sql
-create table public.scores (
+-- ----- scores (leaderboard) -----
+create table if not exists public.scores (
   id uuid primary key default gen_random_uuid(),
   display_name text not null,
   score int not null,
@@ -113,19 +115,44 @@ create table public.scores (
   created_at timestamptz default now()
 );
 
--- Let the app read & insert scores with the public anon key,
--- but never update or delete existing rows.
+-- per-file challenge leaderboards live in the same table:
+alter table public.scores add column if not exists challenge_id uuid;
+
 alter table public.scores enable row level security;
 
+drop policy if exists "anyone can read scores" on public.scores;
 create policy "anyone can read scores"
-  on public.scores for select
-  using (true);
+  on public.scores for select using (true);
 
+drop policy if exists "anyone can add a score" on public.scores;
 create policy "anyone can add a score"
   on public.scores for insert
   with check (
     char_length(display_name) between 1 and 24
     and score >= 0 and score <= 100000
+  );
+
+-- ----- challenges (vocab sets made from notes files) -----
+create table if not exists public.challenges (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  description text,
+  words jsonb not null,
+  created_at timestamptz default now()
+);
+
+alter table public.challenges enable row level security;
+
+drop policy if exists "anyone can read challenges" on public.challenges;
+create policy "anyone can read challenges"
+  on public.challenges for select using (true);
+
+drop policy if exists "anyone can add a challenge" on public.challenges;
+create policy "anyone can add a challenge"
+  on public.challenges for insert
+  with check (
+    char_length(name) between 1 and 60
+    and jsonb_typeof(words) = 'array'
   );
 ```
 
@@ -141,7 +168,12 @@ create policy "anyone can add a score"
   ```
   VITE_SUPABASE_URL=https://YOUR-PROJECT-ref.supabase.co
   VITE_SUPABASE_ANON_KEY=your-anon-public-key
+  VITE_OWNER_CODE=pick-a-secret-code
   ```
+
+  `VITE_OWNER_CODE` is a private word only you know — it unlocks the "add notes
+  file" button so only you can publish challenges (see below). Use the same value
+  in Vercel.
 
 - Restart `npm run dev` (Vite only reads env files on start).
 
@@ -151,6 +183,33 @@ running the app. 🎉
 > The anon key is designed to be public (it's shipped in the browser). Row-Level
 > Security policies above keep it safe: people can read the board and add a
 > score, but can't wipe or edit others' rows.
+
+---
+
+## 📎 Challenges (quiz sets from a notes file)
+
+The **Files** tab lets **you** (the owner) turn a PDF of isiZulu notes into a
+shared quiz set — each with its **own leaderboard** — that friends can compete on.
+
+**How it works**
+1. On the **Files** tab, click **"I'm the owner — unlock"** and enter your
+   `VITE_OWNER_CODE`. (Friends who don't know the code can play challenges but
+   can't create them.)
+2. Click **Add notes file** → upload a **PDF** (or `.txt`), or paste the text.
+3. The app scans the notes for isiZulu–English pairs. **You review them** —
+   edit, delete junk rows, use **Swap columns** if the sides are flipped, add any
+   it missed — then give the challenge a name and **Publish**.
+4. Everyone now sees that challenge, can quiz on it, and competes on its own
+   dedicated leaderboard.
+
+**Good to know**
+- Extraction is best-effort. It works best when notes have one pair per line
+  (e.g. `umama – mother`, `isikole: school`, or `ukudla means to eat`). Messy
+  prose gives rougher results — that's what the review step is for.
+- **Scanned / photo PDFs have no selectable text**, so nothing can be extracted
+  from them. Paste the text in that case.
+- Challenges live in Supabase (shared), unlike your personal word lists (which
+  stay on your device).
 
 ---
 
@@ -174,16 +233,16 @@ git push -u origin main
 1. Go to <https://vercel.com> → **Add New → Project** → import your GitHub repo.
 2. Vercel auto-detects Vite (Build: `npm run build`, Output: `dist`). Leave
    defaults.
-3. Under **Environment Variables**, add `VITE_SUPABASE_URL` and
-   `VITE_SUPABASE_ANON_KEY` with your values.
+3. Under **Environment Variables**, add `VITE_SUPABASE_URL`,
+   `VITE_SUPABASE_ANON_KEY`, and `VITE_OWNER_CODE` with your values.
 4. **Deploy**. You'll get a URL like `https://zulu-vocab.vercel.app` — share it!
 
 ### Option B — Netlify
 1. Go to <https://netlify.com> → **Add new site → Import an existing project** →
    pick your repo.
 2. Build command `npm run build`, publish directory `dist`.
-3. Add the two `VITE_SUPABASE_*` environment variables under **Site settings →
-   Environment variables**.
+3. Add the `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, and `VITE_OWNER_CODE`
+   environment variables under **Site settings → Environment variables**.
 4. **Deploy**.
 
 > Whenever you change env vars on Vercel/Netlify, trigger a redeploy so they take
