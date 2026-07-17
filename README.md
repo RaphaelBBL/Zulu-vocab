@@ -156,6 +156,11 @@ create policy "anyone can add a challenge"
   );
 ```
 
+**2b. Enable the two languages (isiZulu + Afrikaans)**
+- Run **`supabase-language.sql`** in the SQL Editor too. It adds a `language`
+  column to scores/challenges so the app can keep separate isiZulu, Afrikaans,
+  and Combined leaderboards. (Required — the leaderboard reads this column.)
+
 **3. Get your keys**
 - Go to **Project Settings → API**.
 - Copy the **Project URL** and the **anon / public** key. (Do **not** use the

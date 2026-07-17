@@ -11,16 +11,19 @@ import { MODES, shuffle, buildQuestion, QuizRunner, Results, scoreFrom } from '.
 const QUESTIONS = 10
 
 export default function Challenges() {
-  const { recordAnswer, completeQuiz, isAdmin, adminPassword } = useVocab()
+  const { recordAnswer, completeQuiz, isAdmin, adminPassword, language, languageTag } = useVocab()
   const [view, setView] = useState('list') // list | create | quiz | board
-  const [challenges, setChallenges] = useState([])
+  const [allChallenges, setAllChallenges] = useState([])
   const [loading, setLoading] = useState(true)
   const [active, setActive] = useState(null)
+
+  // Only show challenges for the language the learner is currently in.
+  const challenges = allChallenges.filter((c) => (c.language || 'zulu') === language)
 
   async function reload() {
     setLoading(true)
     const { data } = await fetchChallenges()
-    setChallenges(data)
+    setAllChallenges(data)
     setLoading(false)
   }
   useEffect(() => {
@@ -62,6 +65,7 @@ export default function Challenges() {
         <button className="btn sm subtle mb" onClick={() => setView('list')}>All challenges</button>
         <Leaderboard
           challengeId={active.id}
+          language={active.language || 'zulu'}
           heading={active.name}
           subtitle={`Top scores for the “${active.name}” challenge.`}
         />
@@ -75,8 +79,8 @@ export default function Challenges() {
     <div>
       <h1 className="display">Challenges</h1>
       <p className="subtitle">
-        Quiz sets made from real isiZulu notes — each with its own leaderboard.
-        Pick one and see where you land.
+        {languageTag} quiz sets made from real notes — each with its own
+        leaderboard. Pick one and see where you land.
       </p>
 
       <AdminBar onCreate={() => setView('create')} />
@@ -163,7 +167,7 @@ function AdminBar({ onCreate }) {
 
 // ---------- create challenge (upload -> extract -> review -> publish) ----------
 function CreateChallenge({ onDone, onCancel }) {
-  const { adminPassword } = useVocab()
+  const { adminPassword, language } = useVocab()
   const [rows, setRows] = useState([])
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
@@ -208,7 +212,7 @@ function CreateChallenge({ onDone, onCancel }) {
     if (!name.trim() || valid.length < 4) return
     setPublishing(true)
     const words = valid.map((r) => ({ isizulu: r.isizulu.trim(), english: r.english.trim() }))
-    const { error } = await createChallenge({ name: name.trim(), description: description.trim(), words, password: adminPassword })
+    const { error } = await createChallenge({ name: name.trim(), description: description.trim(), words, password: adminPassword, language })
     setPublishing(false)
     if (error) { setNote('Could not publish: ' + error.message); return }
     onDone()
@@ -317,6 +321,7 @@ function ChallengeQuiz({ challenge, recordAnswer, completeQuiz, onExit, onBoard 
         category={challenge.name}
         challengeId={challenge.id}
         challengeName={challenge.name}
+        language={challenge.language || 'zulu'}
         onAgain={() => setPhase('setup')}
         onLeaderboard={onBoard}
       />

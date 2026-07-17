@@ -4,9 +4,9 @@ import { useVocab } from '../context/VocabContext'
 import { submitScore, isSupabaseConfigured } from '../lib/supabase'
 
 export const MODES = [
-  { id: 'mc-ze', label: 'Multiple choice', sub: 'isiZulu to English' },
-  { id: 'mc-ez', label: 'Multiple choice', sub: 'English to isiZulu' },
-  { id: 'type', label: 'Type the answer', sub: 'Spell the isiZulu word' },
+  { id: 'mc-ze', label: 'Multiple choice', sub: 'Word to English' },
+  { id: 'mc-ez', label: 'Multiple choice', sub: 'English to word' },
+  { id: 'type', label: 'Type the answer', sub: 'Spell the word' },
   { id: 'flash', label: 'Flashcards', sub: 'Flip and self-mark' },
 ]
 
@@ -37,7 +37,7 @@ export function acceptableAnswers(english) {
 // Build one question object for a word depending on mode.
 export function buildQuestion(word, mode, allWords) {
   if (mode === 'type') {
-    return { type: 'type', word, prompt: word.english, promptSub: 'Type the isiZulu word', answer: word.isizulu }
+    return { type: 'type', word, prompt: word.english, promptSub: 'Type the word', answer: word.isizulu }
   }
   if (mode === 'flash') {
     return { type: 'flash', word }
@@ -62,7 +62,7 @@ export function buildQuestion(word, mode, allWords) {
     type: 'mc',
     word,
     prompt: promptText,
-    promptSub: zuToEn ? 'What does this mean in English?' : 'How do you say this in isiZulu?',
+    promptSub: zuToEn ? 'What does this mean in English?' : 'What is the word for this?',
     options,
     answer: correctText,
     nounClass: zuToEn ? word.nounClass : null,
@@ -159,7 +159,7 @@ export function QuizRunner({ questions, onAnswer, onFinish, onQuit }) {
             value={typed}
             disabled={!!revealed}
             onChange={(e) => setTyped(e.target.value)}
-            placeholder="Type in isiZulu…"
+            placeholder="Type the word…"
             style={{ textAlign: 'center', fontSize: '1.1rem', marginTop: 10 }}
           />
           {!revealed && <button className="btn block mt" type="submit" disabled={!typed.trim()}>Check</button>}
@@ -173,7 +173,7 @@ export function QuizRunner({ questions, onAnswer, onFinish, onQuit }) {
           <div className={'flash card' + (flipped ? ' flipped' : '')} onClick={() => setFlipped(!flipped)} style={{ padding: 0 }}>
             <div className="flash-inner">
               <div className="flash-face flash-front">
-                <div className="prompt-sub">isiZulu</div>
+                <div className="prompt-sub">Word</div>
                 <div className="prompt-word">{q.word.isizulu}</div>
                 {q.word.nounClass && <span className="nc">class {q.word.nounClass}</span>}
                 <div className="small muted mt">Tap to flip</div>
@@ -197,9 +197,9 @@ export function QuizRunner({ questions, onAnswer, onFinish, onQuit }) {
 }
 
 // ---------- results ----------
-export function Results({ result, modeLabel, category, challengeId, challengeName, onAgain, onLeaderboard }) {
+export function Results({ result, modeLabel, category, challengeId, challengeName, language, onAgain, onLeaderboard }) {
   const { correct, total, accuracy, score, perfect, answers } = result
-  const { displayName, setDisplayName } = useVocab()
+  const { displayName, setDisplayName, language: appLanguage } = useVocab()
   const [name, setName] = useState(displayName || '')
   const [status, setStatus] = useState('idle')
   const wrongs = answers.filter((a) => !a.correct)
@@ -215,6 +215,7 @@ export function Results({ result, modeLabel, category, challengeId, challengeNam
       category,
       accuracy,
       challengeId,
+      language: language || appLanguage,
     })
     setStatus(error ? 'error' : 'sent')
   }

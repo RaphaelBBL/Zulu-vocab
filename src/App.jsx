@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useVocab } from './context/VocabContext'
+import { useVocab, LANGUAGES } from './context/VocabContext'
 import Dashboard from './pages/Dashboard'
 import Vocab from './pages/Vocab'
 import Quiz from './pages/Quiz'
@@ -35,7 +35,7 @@ function TabIcon({ name }) {
 }
 
 export default function App() {
-  const { displayName } = useVocab()
+  const { displayName, language, setLanguage } = useVocab()
   const [tab, setTab] = useState('dashboard')
   const [showName, setShowName] = useState(false)
   const [askedName, setAskedName] = useState(false)
@@ -53,7 +53,7 @@ export default function App() {
           <span className="logo">FG</span>
           <span className="brand-text">
             Funda amaGama
-            <small>isiZulu, one word at a time</small>
+            <small>vocabulary, one word at a time</small>
           </span>
         </div>
         <span className="spacer" />
@@ -61,6 +61,18 @@ export default function App() {
           {displayName ? displayName : 'Set your name'}
         </button>
       </header>
+
+      <div className="lang-switch">
+        {LANGUAGES.map((l) => (
+          <button
+            key={l.id}
+            className={'lang-btn' + (language === l.id ? ' on' : '')}
+            onClick={() => setLanguage(l.id)}
+          >
+            {l.label}
+          </button>
+        ))}
+      </div>
 
       <main className="content">
         {tab === 'dashboard' && <Dashboard go={go} />}

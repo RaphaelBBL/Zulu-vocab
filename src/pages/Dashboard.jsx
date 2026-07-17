@@ -10,14 +10,17 @@ export default function Dashboard({ go }) {
     masteryByCategory,
     troubleWords,
     displayName,
+    language,
+    languageTag,
   } = useVocab()
 
   const wordsPractised = Object.values(progress.wordStats).filter((s) => s.seen > 0).length
+  const greeting = language === 'afrikaans' ? 'Hallo' : 'Sawubona'
 
   return (
     <div>
-      <h1 className="display">Sawubona{displayName ? `, ${displayName}` : ''}.</h1>
-      <p className="subtitle">Where your isiZulu stands today.</p>
+      <h1 className="display">{greeting}{displayName ? `, ${displayName}` : ''}.</h1>
+      <p className="subtitle">Where your {languageTag} stands today.</p>
 
       <div className="grid cols-3 mb">
         <div className="card stat">

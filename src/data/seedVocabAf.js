@@ -1,0 +1,173 @@
+// Starter Afrikaans vocabulary (First Additional Language level), mirroring the
+// isiZulu themes. Afrikaans nouns don't use noun classes, so that field is
+// omitted. The learner can add/edit their own words in the Words tab.
+
+export const SEED_CATEGORIES_AF = [
+  { id: 'af-greetings',  name: 'Groete & Basies',    emoji: '👋' },
+  { id: 'af-family',     name: 'Familie',            emoji: '👪' },
+  { id: 'af-school',     name: 'Skool',              emoji: '🏫' },
+  { id: 'af-food',       name: 'Kos & Drank',        emoji: '🍲' },
+  { id: 'af-verbs',      name: 'Werkwoorde',         emoji: '🏃' },
+  { id: 'af-adjectives', name: 'Beskrywende Woorde', emoji: '🎨' },
+  { id: 'af-colours',    name: 'Kleure',             emoji: '🌈' },
+  { id: 'af-body',       name: 'Liggaam',            emoji: '🧍' },
+  { id: 'af-animals',    name: 'Diere',              emoji: '🐘' },
+  { id: 'af-numbers',    name: 'Getalle',            emoji: '🔢' },
+]
+
+// Each: { category, isizulu (the Afrikaans term), english, example? }
+// (The field is named "isizulu" so both languages share one data shape.)
+export const SEED_WORDS_AF = [
+  // ---------- Groete & Basies ----------
+  { category: 'af-greetings', isizulu: 'Hallo', english: 'Hello' },
+  { category: 'af-greetings', isizulu: 'Goeiemôre', english: 'Good morning' },
+  { category: 'af-greetings', isizulu: 'Goeiemiddag', english: 'Good afternoon' },
+  { category: 'af-greetings', isizulu: 'Goeienaand', english: 'Good evening' },
+  { category: 'af-greetings', isizulu: 'Hoe gaan dit?', english: 'How are you?', example: 'Hoe gaan dit met jou? — How are you?' },
+  { category: 'af-greetings', isizulu: 'Goed dankie', english: 'Good / well, thank you' },
+  { category: 'af-greetings', isizulu: 'Totsiens', english: 'Goodbye' },
+  { category: 'af-greetings', isizulu: 'Ja', english: 'Yes' },
+  { category: 'af-greetings', isizulu: 'Nee', english: 'No' },
+  { category: 'af-greetings', isizulu: 'Asseblief', english: 'Please' },
+  { category: 'af-greetings', isizulu: 'Dankie', english: 'Thank you' },
+  { category: 'af-greetings', isizulu: 'Jammer', english: 'Sorry' },
+  { category: 'af-greetings', isizulu: 'Wat is jou naam?', english: 'What is your name?' },
+  { category: 'af-greetings', isizulu: 'My naam is...', english: 'My name is...' },
+
+  // ---------- Familie ----------
+  { category: 'af-family', isizulu: 'die familie', english: 'family' },
+  { category: 'af-family', isizulu: 'die ma', english: 'mother' },
+  { category: 'af-family', isizulu: 'die pa', english: 'father' },
+  { category: 'af-family', isizulu: 'die broer', english: 'brother' },
+  { category: 'af-family', isizulu: 'die suster', english: 'sister' },
+  { category: 'af-family', isizulu: 'die ouma', english: 'grandmother' },
+  { category: 'af-family', isizulu: 'die oupa', english: 'grandfather' },
+  { category: 'af-family', isizulu: 'die kind', english: 'child' },
+  { category: 'af-family', isizulu: 'die baba', english: 'baby' },
+  { category: 'af-family', isizulu: 'die seun', english: 'son / boy' },
+  { category: 'af-family', isizulu: 'die dogter', english: 'daughter / girl' },
+  { category: 'af-family', isizulu: 'die oom', english: 'uncle' },
+  { category: 'af-family', isizulu: 'die tannie', english: 'aunt' },
+
+  // ---------- Skool ----------
+  { category: 'af-school', isizulu: 'die skool', english: 'school' },
+  { category: 'af-school', isizulu: 'die onderwyser', english: 'teacher (male)' },
+  { category: 'af-school', isizulu: 'die onderwyseres', english: 'teacher (female)' },
+  { category: 'af-school', isizulu: 'die leerder', english: 'learner' },
+  { category: 'af-school', isizulu: 'die boek', english: 'book' },
+  { category: 'af-school', isizulu: 'die pen', english: 'pen' },
+  { category: 'af-school', isizulu: 'die potlood', english: 'pencil' },
+  { category: 'af-school', isizulu: 'die tafel', english: 'table' },
+  { category: 'af-school', isizulu: 'die stoel', english: 'chair' },
+  { category: 'af-school', isizulu: 'die klas', english: 'class' },
+  { category: 'af-school', isizulu: 'die huiswerk', english: 'homework' },
+
+  // ---------- Kos & Drank ----------
+  { category: 'af-food', isizulu: 'die kos', english: 'food' },
+  { category: 'af-food', isizulu: 'die water', english: 'water' },
+  { category: 'af-food', isizulu: 'die melk', english: 'milk' },
+  { category: 'af-food', isizulu: 'die brood', english: 'bread' },
+  { category: 'af-food', isizulu: 'die vleis', english: 'meat' },
+  { category: 'af-food', isizulu: 'die aartappel', english: 'potato' },
+  { category: 'af-food', isizulu: 'die pap', english: 'porridge' },
+  { category: 'af-food', isizulu: 'die tee', english: 'tea' },
+  { category: 'af-food', isizulu: 'die koffie', english: 'coffee' },
+  { category: 'af-food', isizulu: 'die suiker', english: 'sugar' },
+  { category: 'af-food', isizulu: 'die appel', english: 'apple' },
+  { category: 'af-food', isizulu: 'die eier', english: 'egg' },
+
+  // ---------- Werkwoorde ----------
+  { category: 'af-verbs', isizulu: 'eet', english: 'to eat' },
+  { category: 'af-verbs', isizulu: 'drink', english: 'to drink' },
+  { category: 'af-verbs', isizulu: 'gaan', english: 'to go' },
+  { category: 'af-verbs', isizulu: 'kom', english: 'to come' },
+  { category: 'af-verbs', isizulu: 'sien', english: 'to see' },
+  { category: 'af-verbs', isizulu: 'hoor', english: 'to hear' },
+  { category: 'af-verbs', isizulu: 'praat', english: 'to speak / talk' },
+  { category: 'af-verbs', isizulu: 'lees', english: 'to read' },
+  { category: 'af-verbs', isizulu: 'skryf', english: 'to write' },
+  { category: 'af-verbs', isizulu: 'werk', english: 'to work' },
+  { category: 'af-verbs', isizulu: 'slaap', english: 'to sleep' },
+  { category: 'af-verbs', isizulu: 'opstaan', english: 'to get up / wake up' },
+  { category: 'af-verbs', isizulu: 'hou van', english: 'to like / love' },
+  { category: 'af-verbs', isizulu: 'sit', english: 'to sit' },
+  { category: 'af-verbs', isizulu: 'hardloop', english: 'to run' },
+  { category: 'af-verbs', isizulu: 'help', english: 'to help' },
+
+  // ---------- Beskrywende Woorde ----------
+  { category: 'af-adjectives', isizulu: 'groot', english: 'big / large' },
+  { category: 'af-adjectives', isizulu: 'klein', english: 'small' },
+  { category: 'af-adjectives', isizulu: 'lank', english: 'tall / long' },
+  { category: 'af-adjectives', isizulu: 'kort', english: 'short' },
+  { category: 'af-adjectives', isizulu: 'mooi', english: 'beautiful / pretty' },
+  { category: 'af-adjectives', isizulu: 'lelik', english: 'ugly' },
+  { category: 'af-adjectives', isizulu: 'nuut', english: 'new' },
+  { category: 'af-adjectives', isizulu: 'oud', english: 'old' },
+  { category: 'af-adjectives', isizulu: 'lekker', english: 'nice / tasty' },
+  { category: 'af-adjectives', isizulu: 'warm', english: 'warm / hot' },
+  { category: 'af-adjectives', isizulu: 'koud', english: 'cold' },
+  { category: 'af-adjectives', isizulu: 'vinnig', english: 'fast' },
+  { category: 'af-adjectives', isizulu: 'stadig', english: 'slow' },
+
+  // ---------- Kleure ----------
+  { category: 'af-colours', isizulu: 'wit', english: 'white' },
+  { category: 'af-colours', isizulu: 'swart', english: 'black' },
+  { category: 'af-colours', isizulu: 'rooi', english: 'red' },
+  { category: 'af-colours', isizulu: 'blou', english: 'blue' },
+  { category: 'af-colours', isizulu: 'groen', english: 'green' },
+  { category: 'af-colours', isizulu: 'geel', english: 'yellow' },
+  { category: 'af-colours', isizulu: 'bruin', english: 'brown' },
+  { category: 'af-colours', isizulu: 'oranje', english: 'orange' },
+  { category: 'af-colours', isizulu: 'pers', english: 'purple' },
+  { category: 'af-colours', isizulu: 'pienk', english: 'pink' },
+  { category: 'af-colours', isizulu: 'grys', english: 'grey' },
+
+  // ---------- Liggaam ----------
+  { category: 'af-body', isizulu: 'die liggaam', english: 'body' },
+  { category: 'af-body', isizulu: 'die kop', english: 'head' },
+  { category: 'af-body', isizulu: 'die oog', english: 'eye' },
+  { category: 'af-body', isizulu: 'die oor', english: 'ear' },
+  { category: 'af-body', isizulu: 'die neus', english: 'nose' },
+  { category: 'af-body', isizulu: 'die mond', english: 'mouth' },
+  { category: 'af-body', isizulu: 'die tand', english: 'tooth' },
+  { category: 'af-body', isizulu: 'die hand', english: 'hand' },
+  { category: 'af-body', isizulu: 'die voet', english: 'foot' },
+  { category: 'af-body', isizulu: 'die hart', english: 'heart' },
+  { category: 'af-body', isizulu: 'die maag', english: 'stomach' },
+  { category: 'af-body', isizulu: 'die hare', english: 'hair' },
+  { category: 'af-body', isizulu: 'die arm', english: 'arm' },
+  { category: 'af-body', isizulu: 'die been', english: 'leg' },
+
+  // ---------- Diere ----------
+  { category: 'af-animals', isizulu: 'die hond', english: 'dog' },
+  { category: 'af-animals', isizulu: 'die kat', english: 'cat' },
+  { category: 'af-animals', isizulu: 'die koei', english: 'cow' },
+  { category: 'af-animals', isizulu: 'die bok', english: 'goat / buck' },
+  { category: 'af-animals', isizulu: 'die skaap', english: 'sheep' },
+  { category: 'af-animals', isizulu: 'die perd', english: 'horse' },
+  { category: 'af-animals', isizulu: 'die hoender', english: 'chicken' },
+  { category: 'af-animals', isizulu: 'die voël', english: 'bird' },
+  { category: 'af-animals', isizulu: 'die leeu', english: 'lion' },
+  { category: 'af-animals', isizulu: 'die olifant', english: 'elephant' },
+  { category: 'af-animals', isizulu: 'die slang', english: 'snake' },
+  { category: 'af-animals', isizulu: 'die vis', english: 'fish' },
+  { category: 'af-animals', isizulu: 'die aap', english: 'monkey' },
+
+  // ---------- Getalle ----------
+  { category: 'af-numbers', isizulu: 'een', english: 'one (1)' },
+  { category: 'af-numbers', isizulu: 'twee', english: 'two (2)' },
+  { category: 'af-numbers', isizulu: 'drie', english: 'three (3)' },
+  { category: 'af-numbers', isizulu: 'vier', english: 'four (4)' },
+  { category: 'af-numbers', isizulu: 'vyf', english: 'five (5)' },
+  { category: 'af-numbers', isizulu: 'ses', english: 'six (6)' },
+  { category: 'af-numbers', isizulu: 'sewe', english: 'seven (7)' },
+  { category: 'af-numbers', isizulu: 'agt', english: 'eight (8)' },
+  { category: 'af-numbers', isizulu: 'nege', english: 'nine (9)' },
+  { category: 'af-numbers', isizulu: 'tien', english: 'ten (10)' },
+]
+
+export const SEED_VIDEOS_AF = [
+  { categoryId: 'af-greetings', title: 'Afrikaans greetings for beginners', youtubeUrl: 'https://www.youtube.com/results?search_query=afrikaans+greetings+for+beginners' },
+  { categoryId: 'af-numbers', title: 'Counting in Afrikaans 1–10', youtubeUrl: 'https://www.youtube.com/results?search_query=count+to+ten+in+afrikaans' },
+  { categoryId: 'general', title: 'Learn Afrikaans — beginner playlist', youtubeUrl: 'https://www.youtube.com/results?search_query=learn+afrikaans+for+beginners+playlist' },
+]
