@@ -1,22 +1,21 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useVocab } from '../context/VocabContext'
 import {
-  fetchChallenges, createChallenge, isSupabaseConfigured,
-  ownerCodeConfigured, checkOwnerCode,
+  fetchChallenges, createChallenge, adminDeleteChallenge,
+  verifyAdmin, isSupabaseConfigured,
 } from '../lib/supabase'
 import { pdfToText, extractPairs } from '../lib/extract'
-import { load, save } from '../lib/storage'
 import Leaderboard from './Leaderboard'
 import { MODES, shuffle, buildQuestion, QuizRunner, Results, scoreFrom } from '../components/QuizEngine'
 
 const QUESTIONS = 10
 
 export default function Challenges() {
-  const { recordAnswer, completeQuiz } = useVocab()
+  const { recordAnswer, completeQuiz, isAdmin, adminPassword } = useVocab()
   const [view, setView] = useState('list') // list | create | quiz | board
   const [challenges, setChallenges] = useState([])
   const [loading, setLoading] = useState(true)
-  const [active, setActive] = useState(null) // selected challenge for quiz/board
+  const [active, setActive] = useState(null)
 
   async function reload() {
     setLoading(true)
@@ -28,6 +27,13 @@ export default function Challenges() {
     if (isSupabaseConfigured) reload()
     else setLoading(false)
   }, [])
+
+  async function onDelete(c) {
+    if (!confirm(`Delete the “${c.name}” challenge and its leaderboard? This can't be undone.`)) return
+    const { error } = await adminDeleteChallenge(c.id, adminPassword)
+    if (error) alert('Could not delete: ' + error.message)
+    else reload()
+  }
 
   if (!isSupabaseConfigured) {
     return (
@@ -73,12 +79,10 @@ export default function Challenges() {
         Pick one and see where you land.
       </p>
 
-      <OwnerBar onCreate={() => setView('create')} />
+      <AdminBar onCreate={() => setView('create')} />
 
       {loading && <div className="empty">Loading challenges…</div>}
-      {!loading && challenges.length === 0 && (
-        <div className="empty">No challenges yet. {ownerCodeConfigured ? 'Add one from your notes above.' : ''}</div>
-      )}
+      {!loading && challenges.length === 0 && <div className="empty">No challenges yet.</div>}
 
       <div className="grid mt">
         {challenges.map((c) => (
@@ -89,6 +93,9 @@ export default function Challenges() {
                 {c.description && <div className="small muted">{c.description}</div>}
                 <div className="small muted mt">{(c.words || []).length} words</div>
               </div>
+              {isAdmin && (
+                <button className="icon-btn" title="Delete challenge (admin)" onClick={() => onDelete(c)}>✕</button>
+              )}
             </div>
             <div className="row mt" style={{ gap: 8 }}>
               <button className="btn spread" onClick={() => { setActive(c); setView('quiz') }}>Take challenge</button>
@@ -101,57 +108,53 @@ export default function Challenges() {
   )
 }
 
-// ---------- owner unlock bar ----------
-function OwnerBar({ onCreate }) {
-  const [unlocked, setUnlocked] = useState(() => load('ownerUnlocked', false))
-  const [code, setCode] = useState('')
+// ---------- admin unlock bar (server-verified password) ----------
+function AdminBar({ onCreate }) {
+  const { isAdmin, setAdminPassword, clearAdmin } = useVocab()
   const [open, setOpen] = useState(false)
+  const [pw, setPw] = useState('')
+  const [busy, setBusy] = useState(false)
   const [wrong, setWrong] = useState(false)
 
-  if (!ownerCodeConfigured) {
+  if (isAdmin) {
     return (
-      <div className="notice mb">
-        Adding challenges is owner-only. Set an owner code (<code>VITE_OWNER_CODE</code>)
-        in your environment to unlock the “add notes file” button. See the README.
+      <div className="row between owner-bar mb">
+        <span className="small">Admin mode — you can add and remove challenges, and moderate the leaderboards.</span>
+        <div className="row" style={{ gap: 8 }}>
+          <button className="btn sm" onClick={onCreate}>Add notes file</button>
+          <button className="btn sm subtle" onClick={clearAdmin}>Lock</button>
+        </div>
       </div>
     )
   }
 
-  if (unlocked) {
-    return (
-      <div className="row between owner-bar mb">
-        <span className="small">🔓 Owner mode — you can add challenges from your notes.</span>
-        <button className="btn sm" onClick={onCreate}>Add notes file</button>
-      </div>
-    )
+  async function tryUnlock() {
+    setBusy(true); setWrong(false)
+    const ok = await verifyAdmin(pw)
+    setBusy(false)
+    if (ok) setAdminPassword(pw.trim())
+    else setWrong(true)
   }
 
   return (
     <div className="mb">
       {!open ? (
-        <button className="btn sm subtle" onClick={() => setOpen(true)}>I'm the owner — unlock</button>
+        <button className="btn sm subtle" onClick={() => setOpen(true)}>Admin sign in</button>
       ) : (
         <div className="card">
-          <label>Owner code</label>
+          <label>Admin password</label>
           <div className="row" style={{ gap: 8 }}>
             <input
-              className="spread"
-              type="password"
-              value={code}
-              onChange={(e) => { setCode(e.target.value); setWrong(false) }}
-              placeholder="Enter owner code"
+              className="spread" type="password" value={pw}
+              onChange={(e) => { setPw(e.target.value); setWrong(false) }}
+              onKeyDown={(e) => { if (e.key === 'Enter') tryUnlock() }}
+              placeholder="Enter admin password"
             />
-            <button
-              className="btn"
-              onClick={() => {
-                if (checkOwnerCode(code)) { setUnlocked(true); save('ownerUnlocked', true) }
-                else setWrong(true)
-              }}
-            >
-              Unlock
+            <button className="btn" onClick={tryUnlock} disabled={busy || !pw.trim()}>
+              {busy ? '…' : 'Unlock'}
             </button>
           </div>
-          {wrong && <p className="feedback bad small mt">That code isn't right.</p>}
+          {wrong && <p className="feedback bad small mt">That password isn't right.</p>}
         </div>
       )}
     </div>
@@ -160,7 +163,8 @@ function OwnerBar({ onCreate }) {
 
 // ---------- create challenge (upload -> extract -> review -> publish) ----------
 function CreateChallenge({ onDone, onCancel }) {
-  const [rows, setRows] = useState([]) // {isizulu, english}
+  const { adminPassword } = useVocab()
+  const [rows, setRows] = useState([])
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [text, setText] = useState('')
@@ -176,9 +180,8 @@ function CreateChallenge({ onDone, onCancel }) {
       let raw = ''
       if (file.name.toLowerCase().endsWith('.pdf')) raw = await pdfToText(file)
       else raw = await file.text()
-      if (!raw.trim()) {
-        setNote('No readable text found. If it’s a scanned/photo PDF, paste the text below instead.')
-      } else {
+      if (!raw.trim()) setNote('No readable text found. If it’s a scanned/photo PDF, paste the text below instead.')
+      else {
         applyText(raw)
         if (!name) setName(file.name.replace(/\.[^.]+$/, ''))
       }
@@ -194,9 +197,7 @@ function CreateChallenge({ onDone, onCancel }) {
     setNote(pairs.length ? `Found ${pairs.length} candidate word${pairs.length !== 1 ? 's' : ''} — review and fix below.` : 'No word pairs detected. Check the format (e.g. “umama – mother” per line).')
   }
 
-  function updateRow(i, patch) {
-    setRows((prev) => prev.map((r, idx) => (idx === i ? { ...r, ...patch } : r)))
-  }
+  function updateRow(i, patch) { setRows((prev) => prev.map((r, idx) => (idx === i ? { ...r, ...patch } : r))) }
   function removeRow(i) { setRows((prev) => prev.filter((_, idx) => idx !== i)) }
   function addRow() { setRows((prev) => [...prev, { isizulu: '', english: '' }]) }
   function swapAll() { setRows((prev) => prev.map((r) => ({ isizulu: r.english, english: r.isizulu }))) }
@@ -207,7 +208,7 @@ function CreateChallenge({ onDone, onCancel }) {
     if (!name.trim() || valid.length < 4) return
     setPublishing(true)
     const words = valid.map((r) => ({ isizulu: r.isizulu.trim(), english: r.english.trim() }))
-    const { error } = await createChallenge({ name: name.trim(), description: description.trim(), words })
+    const { error } = await createChallenge({ name: name.trim(), description: description.trim(), words, password: adminPassword })
     setPublishing(false)
     if (error) { setNote('Could not publish: ' + error.message); return }
     onDone()
@@ -245,9 +246,7 @@ function CreateChallenge({ onDone, onCancel }) {
             <button className="btn sm subtle" onClick={swapAll} title="Swap the isiZulu and English columns">Swap columns</button>
           </div>
           <div className="card" style={{ padding: 8 }}>
-            <div className="review-head">
-              <span>isiZulu</span><span>English</span><span></span>
-            </div>
+            <div className="review-head"><span>isiZulu</span><span>English</span><span></span></div>
             {rows.map((r, i) => (
               <div className="review-row" key={i}>
                 <input value={r.isizulu} onChange={(e) => updateRow(i, { isizulu: e.target.value })} placeholder="isiZulu" />
@@ -285,7 +284,6 @@ function ChallengeQuiz({ challenge, recordAnswer, completeQuiz, onExit, onBoard 
   const [questions, setQuestions] = useState([])
   const [result, setResult] = useState(null)
 
-  // Give the challenge words ids + a shared category so distractors stay in-set.
   const words = useMemo(
     () => (challenge.words || []).map((w, i) => ({ id: `ch-${challenge.id}-${i}`, category: 'challenge', ...w })),
     [challenge]

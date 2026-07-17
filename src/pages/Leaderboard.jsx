@@ -1,14 +1,18 @@
 import { useEffect, useState } from 'react'
-import { fetchTopScores, isSupabaseConfigured } from '../lib/supabase'
+import {
+  fetchTopScores, isSupabaseConfigured,
+  adminDeleteScore, adminAddScore,
+} from '../lib/supabase'
 import { useVocab } from '../context/VocabContext'
 
 // Reusable board. Pass a challengeId + heading for a per-file leaderboard;
 // omit them for the main global board.
 export default function Leaderboard({ challengeId = null, heading, subtitle }) {
-  const { displayName } = useVocab()
+  const { displayName, isAdmin, adminPassword } = useVocab()
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
+  const [showAward, setShowAward] = useState(false)
 
   async function loadScores() {
     setLoading(true)
@@ -23,6 +27,13 @@ export default function Leaderboard({ challengeId = null, heading, subtitle }) {
     if (isSupabaseConfigured) loadScores()
     else setLoading(false)
   }, [challengeId])
+
+  async function onDeleteRow(r) {
+    if (!confirm(`Remove "${r.display_name}" (${r.score} pts) from the leaderboard?`)) return
+    const { error } = await adminDeleteScore(r.id, adminPassword)
+    if (error) alert('Could not remove: ' + error.message)
+    else loadScores()
+  }
 
   const myBestIndex = rows.findIndex(
     (r) => displayName && r.display_name.toLowerCase() === displayName.toLowerCase()
@@ -55,6 +66,18 @@ export default function Leaderboard({ challengeId = null, heading, subtitle }) {
         <button className="btn sm subtle" onClick={loadScores}>Refresh</button>
       </div>
       <p className="subtitle">{subtitle || 'Top scores from everyone playing. Beat your classmates.'}</p>
+
+      {isAdmin && (
+        <div className="owner-bar mb">
+          <div className="row between">
+            <span className="small">Admin: remove entries with the ✕, or award points.</span>
+            <button className="btn sm" onClick={() => setShowAward((s) => !s)}>
+              {showAward ? 'Close' : 'Award points'}
+            </button>
+          </div>
+          {showAward && <AwardForm challengeId={challengeId} password={adminPassword} onDone={() => { setShowAward(false); loadScores() }} />}
+        </div>
+      )}
 
       {myBestIndex >= 0 && (
         <div className="card mb" style={{ background: 'var(--paper-2)', borderColor: 'var(--gold)' }}>
@@ -89,11 +112,42 @@ export default function Leaderboard({ challengeId = null, heading, subtitle }) {
                   </div>
                 </div>
                 <span className="lb-score">{r.score}</span>
+                {isAdmin && (
+                  <button className="icon-btn" title="Remove entry (admin)" onClick={() => onDeleteRow(r)}>✕</button>
+                )}
               </div>
             )
           })}
         </div>
       )}
+    </div>
+  )
+}
+
+function AwardForm({ challengeId, password, onDone }) {
+  const [name, setName] = useState('')
+  const [points, setPoints] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState('')
+
+  async function submit() {
+    const score = parseInt(points, 10)
+    if (!name.trim() || isNaN(score)) { setErr('Enter a name and a number of points.'); return }
+    setBusy(true); setErr('')
+    const { error } = await adminAddScore({ displayName: name.trim(), score, challengeId }, password)
+    setBusy(false)
+    if (error) setErr('Could not award: ' + error.message)
+    else onDone()
+  }
+
+  return (
+    <div className="mt" style={{ display: 'grid', gap: 8 }}>
+      <div className="row" style={{ gap: 8 }}>
+        <input className="spread" value={name} maxLength={24} onChange={(e) => setName(e.target.value)} placeholder="Display name" />
+        <input style={{ maxWidth: 110 }} type="number" value={points} onChange={(e) => setPoints(e.target.value)} placeholder="Points" />
+      </div>
+      <button className="btn sm gold" onClick={submit} disabled={busy}>{busy ? 'Awarding…' : 'Award points'}</button>
+      {err && <p className="feedback bad small">{err}</p>}
     </div>
   )
 }

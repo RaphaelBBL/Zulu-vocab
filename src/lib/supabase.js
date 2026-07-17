@@ -19,11 +19,12 @@ export const isSupabaseConfigured = Boolean(
 
 export const supabase = isSupabaseConfigured ? createClient(url, anonKey) : null
 
-// ---- owner gating (client-side, matches the no-login design) ------------
-const OWNER_CODE = import.meta.env.VITE_OWNER_CODE || ''
-export const ownerCodeConfigured = OWNER_CODE.length > 0
-export function checkOwnerCode(code) {
-  return ownerCodeConfigured && (code || '').trim() === OWNER_CODE
+// ---- admin gating (server-verified; password lives only in the database) --
+// Returns true if the password matches the admin_password stored in Supabase.
+export async function verifyAdmin(password) {
+  if (!supabase) return false
+  const { data, error } = await supabase.rpc('is_admin', { p_password: (password || '').trim() })
+  return !error && data === true
 }
 
 // ---- scores -------------------------------------------------------------
@@ -66,12 +67,38 @@ export async function fetchChallenges() {
   return { data: data || [], error }
 }
 
-export async function createChallenge({ name, description, words }) {
+// Creating a challenge is admin-only (verified server-side by the password).
+export async function createChallenge({ name, description, words, password }) {
   if (!supabase) return { error: new Error('Not configured') }
-  const { data, error } = await supabase
-    .from('challenges')
-    .insert({ name, description, words })
-    .select()
-    .single()
+  const { data, error } = await supabase.rpc('admin_create_challenge', {
+    p_name: name,
+    p_description: description || '',
+    p_words: words,
+    p_password: (password || '').trim(),
+  })
   return { data, error }
+}
+
+// ---- admin moderation (all server-verified) -----------------------------
+export async function adminDeleteChallenge(id, password) {
+  if (!supabase) return { error: new Error('Not configured') }
+  const { error } = await supabase.rpc('admin_delete_challenge', { p_id: id, p_password: (password || '').trim() })
+  return { error }
+}
+
+export async function adminDeleteScore(id, password) {
+  if (!supabase) return { error: new Error('Not configured') }
+  const { error } = await supabase.rpc('admin_delete_score', { p_id: id, p_password: (password || '').trim() })
+  return { error }
+}
+
+export async function adminAddScore({ displayName, score, challengeId }, password) {
+  if (!supabase) return { error: new Error('Not configured') }
+  const { error } = await supabase.rpc('admin_add_score', {
+    p_display_name: displayName,
+    p_score: score,
+    p_challenge_id: challengeId || null,
+    p_password: (password || '').trim(),
+  })
+  return { error }
 }

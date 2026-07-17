@@ -58,6 +58,9 @@ export function VocabProvider({ children }) {
   const [videos, setVideos] = useState(initVideos)
   const [progress, setProgress] = useState(initProgress)
   const [displayName, setDisplayNameState] = useState(() => load('displayName', ''))
+  // Admin password (verified server-side). Stored only on this device once the
+  // admin unlocks; never shipped in the app bundle.
+  const [adminPassword, setAdminPasswordState] = useState(() => load('adminPassword', ''))
 
   // persist
   useEffect(() => save('words', words), [words])
@@ -65,6 +68,7 @@ export function VocabProvider({ children }) {
   useEffect(() => save('videos', videos), [videos])
   useEffect(() => save('progress', progress), [progress])
   useEffect(() => save('displayName', displayName), [displayName])
+  useEffect(() => save('adminPassword', adminPassword), [adminPassword])
 
   // ---- vocab CRUD ----
   function addWord(w) {
@@ -200,6 +204,9 @@ export function VocabProvider({ children }) {
     setDisplayNameState((name || '').trim().slice(0, 24))
   }
 
+  function setAdminPassword(pw) { setAdminPasswordState(pw || '') }
+  function clearAdmin() { setAdminPasswordState('') }
+
   // ---- derived ----
   const accuracy = progress.totalAnswered
     ? Math.round((progress.totalCorrect / progress.totalAnswered) * 100)
@@ -252,6 +259,10 @@ export function VocabProvider({ children }) {
     troubleWords,
     displayName,
     setDisplayName,
+    adminPassword,
+    isAdmin: !!adminPassword,
+    setAdminPassword,
+    clearAdmin,
     addWord,
     updateWord,
     deleteWord,

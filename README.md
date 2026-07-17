@@ -168,14 +168,13 @@ create policy "anyone can add a challenge"
   ```
   VITE_SUPABASE_URL=https://YOUR-PROJECT-ref.supabase.co
   VITE_SUPABASE_ANON_KEY=your-anon-public-key
-  VITE_OWNER_CODE=pick-a-secret-code
   ```
 
-  `VITE_OWNER_CODE` is a private word only you know — it unlocks the "add notes
-  file" button so only you can publish challenges (see below). Use the same value
-  in Vercel.
-
 - Restart `npm run dev` (Vite only reads env files on start).
+
+> Admin powers (creating/deleting challenges, moderating leaderboards) use a
+> separate **admin password stored in the database** — see *Admin controls*
+> below. It is deliberately NOT an env var, so it never ships in the browser.
 
 The Leaderboard tab should now be live, and scores will sync across every device
 running the app. 🎉
@@ -188,13 +187,13 @@ running the app. 🎉
 
 ## 📎 Challenges (quiz sets from a notes file)
 
-The **Files** tab lets **you** (the owner) turn a PDF of isiZulu notes into a
+The **Files** tab lets **you** (the admin) turn a PDF of isiZulu notes into a
 shared quiz set — each with its **own leaderboard** — that friends can compete on.
 
 **How it works**
-1. On the **Files** tab, click **"I'm the owner — unlock"** and enter your
-   `VITE_OWNER_CODE`. (Friends who don't know the code can play challenges but
-   can't create them.)
+1. On the **Files** tab, click **Admin sign in** and enter your admin password
+   (see *Admin controls* below). Friends can play challenges without it; only you
+   can create/delete them.
 2. Click **Add notes file** → upload a **PDF** (or `.txt`), or paste the text.
 3. The app scans the notes for isiZulu–English pairs. **You review them** —
    edit, delete junk rows, use **Swap columns** if the sides are flipped, add any
@@ -210,6 +209,34 @@ shared quiz set — each with its **own leaderboard** — that friends can compe
   from them. Paste the text in that case.
 - Challenges live in Supabase (shared), unlike your personal word lists (which
   stay on your device).
+
+---
+
+## 🛡️ Admin controls
+
+You (and only you) can create/delete challenges and moderate the leaderboards
+(remove entries with offensive names, or award points). Because there's no login
+and the anon key is public, a browser-only check couldn't truly stop others — so
+the **admin password lives in the database** and every destructive action is
+verified server-side.
+
+**One-time setup**
+1. Open **`supabase-admin.sql`** (in this repo). Change the line
+   `'CHANGE-ME-to-your-admin-password'` to your own private password.
+2. Paste the whole file into Supabase **SQL Editor** and **Run**. This creates
+   the admin functions and makes challenge creation admin-only.
+
+**Using it**
+- **Files** tab → **Admin sign in** → enter that password. It's verified by the
+  database and remembered on your device (never in the app code). Use **Lock** to
+  sign out.
+- Once signed in: an **✕** appears on each challenge (delete it + its board), and
+  each leaderboard gains **✕** on rows (remove an entry) plus an **Award points**
+  button (give a name bonus points).
+- To change the password later:
+  `update public.app_secrets set value = 'new-password' where key = 'admin_password';`
+
+> Deleting a challenge also clears its leaderboard. Deletes can't be undone.
 
 ---
 
@@ -233,16 +260,17 @@ git push -u origin main
 1. Go to <https://vercel.com> → **Add New → Project** → import your GitHub repo.
 2. Vercel auto-detects Vite (Build: `npm run build`, Output: `dist`). Leave
    defaults.
-3. Under **Environment Variables**, add `VITE_SUPABASE_URL`,
-   `VITE_SUPABASE_ANON_KEY`, and `VITE_OWNER_CODE` with your values.
+3. Under **Environment Variables**, add `VITE_SUPABASE_URL` and
+   `VITE_SUPABASE_ANON_KEY` with your values. (No `VITE_OWNER_CODE` — admin uses
+   a database password instead; see *Admin controls*.)
 4. **Deploy**. You'll get a URL like `https://zulu-vocab.vercel.app` — share it!
 
 ### Option B — Netlify
 1. Go to <https://netlify.com> → **Add new site → Import an existing project** →
    pick your repo.
 2. Build command `npm run build`, publish directory `dist`.
-3. Add the `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, and `VITE_OWNER_CODE`
-   environment variables under **Site settings → Environment variables**.
+3. Add the `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` environment variables
+   under **Site settings → Environment variables**.
 4. **Deploy**.
 
 > Whenever you change env vars on Vercel/Netlify, trigger a redeploy so they take
