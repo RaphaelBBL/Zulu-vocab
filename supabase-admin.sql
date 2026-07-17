@@ -82,8 +82,9 @@ create or replace function public.admin_add_score(
 ) returns void language plpgsql security definer set search_path = public as $$
 begin
   if not public.is_admin(p_password) then raise exception 'unauthorized'; end if;
+  -- Stored as a normal score (no 'admin' tag) so it blends into the board.
   insert into public.scores (display_name, score, quiz_mode, category, accuracy, challenge_id)
-  values (left(p_display_name, 24), greatest(0, p_score), 'admin award', 'admin', null, p_challenge_id);
+  values (left(p_display_name, 24), greatest(0, p_score), null, null, null, p_challenge_id);
 end; $$;
 
 -- 7. Let the app (anon role) call these functions --------------------------
