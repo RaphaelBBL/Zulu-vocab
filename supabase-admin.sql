@@ -64,6 +64,18 @@ begin
   delete from public.scores where id = p_id;
 end; $$;
 
+-- 5b. Admin-only remove a whole person from a board (all their entries) -----
+create or replace function public.admin_delete_name(p_name text, p_challenge_id uuid, p_password text)
+returns void language plpgsql security definer set search_path = public as $$
+begin
+  if not public.is_admin(p_password) then raise exception 'unauthorized'; end if;
+  if p_challenge_id is null then
+    delete from public.scores where lower(display_name) = lower(p_name) and challenge_id is null;
+  else
+    delete from public.scores where lower(display_name) = lower(p_name) and challenge_id = p_challenge_id;
+  end if;
+end; $$;
+
 -- 6. Admin-only award points to a name -------------------------------------
 create or replace function public.admin_add_score(
   p_display_name text, p_score int, p_challenge_id uuid, p_password text
@@ -79,6 +91,7 @@ grant execute on function public.is_admin(text) to anon;
 grant execute on function public.admin_create_challenge(text, text, jsonb, text) to anon;
 grant execute on function public.admin_delete_challenge(uuid, text) to anon;
 grant execute on function public.admin_delete_score(uuid, text) to anon;
+grant execute on function public.admin_delete_name(text, uuid, text) to anon;
 grant execute on function public.admin_add_score(text, int, uuid, text) to anon;
 
 -- 8. Now that creation is admin-only, block anonymous direct inserts --------

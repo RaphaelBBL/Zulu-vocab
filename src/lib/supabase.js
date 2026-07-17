@@ -92,6 +92,17 @@ export async function adminDeleteScore(id, password) {
   return { error }
 }
 
+// Remove every entry for a display name on one board (challengeId null = global).
+export async function adminDeleteName(name, challengeId, password) {
+  if (!supabase) return { error: new Error('Not configured') }
+  const { error } = await supabase.rpc('admin_delete_name', {
+    p_name: name,
+    p_challenge_id: challengeId || null,
+    p_password: (password || '').trim(),
+  })
+  return { error }
+}
+
 export async function adminAddScore({ displayName, score, challengeId }, password) {
   if (!supabase) return { error: new Error('Not configured') }
   const { error } = await supabase.rpc('admin_add_score', {
