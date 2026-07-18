@@ -83,6 +83,28 @@ export async function createChallenge({ name, description, words, password, lang
   return { data, error }
 }
 
+// ---- suggestions / feedback ---------------------------------------------
+export async function submitFeedback({ name, message }) {
+  if (!supabase) return { error: new Error('Not configured') }
+  const { error } = await supabase.from('feedback').insert({
+    name: (name || '').trim().slice(0, 40) || null,
+    message: (message || '').trim().slice(0, 2000),
+  })
+  return { error }
+}
+
+export async function adminListFeedback(password) {
+  if (!supabase) return { data: [], error: new Error('Not configured') }
+  const { data, error } = await supabase.rpc('admin_list_feedback', { p_password: (password || '').trim() })
+  return { data: data || [], error }
+}
+
+export async function adminDeleteFeedback(id, password) {
+  if (!supabase) return { error: new Error('Not configured') }
+  const { error } = await supabase.rpc('admin_delete_feedback', { p_id: id, p_password: (password || '').trim() })
+  return { error }
+}
+
 // ---- admin moderation (all server-verified) -----------------------------
 export async function adminDeleteChallenge(id, password) {
   if (!supabase) return { error: new Error('Not configured') }

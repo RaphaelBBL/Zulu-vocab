@@ -7,6 +7,7 @@ import Challenges from './pages/Challenges'
 import Videos from './pages/Videos'
 import Leaderboard from './pages/Leaderboard'
 import NameModal from './components/NameModal'
+import Footer from './components/Footer'
 
 const TABS = [
   { id: 'dashboard', label: 'Home', ico: 'home' },
@@ -81,6 +82,7 @@ export default function App() {
         {tab === 'challenges' && <Challenges />}
         {tab === 'videos' && <Videos />}
         {tab === 'leaderboard' && <Leaderboard />}
+        <Footer />
       </main>
 
       <nav className="nav">

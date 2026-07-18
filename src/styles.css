@@ -293,6 +293,17 @@ textarea { resize: vertical; min-height: 90px; line-height: 1.45; }
 .mb { margin-bottom: 14px; }
 code { background: var(--paper-2); padding: 1px 5px; border-radius: 4px; font-size: 0.85em; }
 
+/* site footer */
+.site-footer {
+  margin-top: 40px; padding: 22px 10px 6px; border-top: 1px solid var(--line);
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+}
+.made-by {
+  font-family: var(--serif); font-size: 0.9rem; color: var(--muted);
+  letter-spacing: 0.3px;
+}
+.made-by::before { content: '♥ '; color: var(--terra); }
+
 /* modal */
 .modal-backdrop { position: fixed; inset: 0; background: rgba(30,24,14,0.5); z-index: 40; display: grid; place-items: center; padding: 16px; }
 .modal { background: var(--card); border-radius: var(--radius); padding: 22px; width: 100%; max-width: 440px; box-shadow: 0 18px 54px rgba(0,0,0,0.3); max-height: 88vh; overflow: auto; }
