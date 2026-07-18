@@ -29,7 +29,7 @@ export async function verifyAdmin(password) {
 
 // ---- scores -------------------------------------------------------------
 // challengeId null/undefined => the main (global) leaderboard.
-export async function submitScore({ displayName, score, quizMode, category, accuracy, challengeId, language }) {
+export async function submitScore({ displayName, score, quizMode, category, accuracy, challengeId, language, school }) {
   if (!supabase) return { error: new Error('Leaderboard not configured') }
   const { error } = await supabase.from('scores').insert({
     display_name: displayName,
@@ -39,6 +39,7 @@ export async function submitScore({ displayName, score, quizMode, category, accu
     accuracy,
     challenge_id: challengeId || null,
     language: language || 'zulu',
+    school: school || null,
   })
   return { error }
 }
@@ -48,7 +49,7 @@ export async function fetchTopScores(limit = 1000, challengeId = null, language 
   if (!supabase) return { data: [], error: new Error('Leaderboard not configured') }
   let q = supabase
     .from('scores')
-    .select('id, display_name, score, quiz_mode, category, accuracy, created_at, challenge_id, language')
+    .select('id, display_name, score, quiz_mode, category, accuracy, created_at, challenge_id, language, school')
     .order('score', { ascending: false })
     .order('created_at', { ascending: true })
     .limit(limit)
@@ -81,6 +82,33 @@ export async function createChallenge({ name, description, words, password, lang
     p_password: (password || '').trim(),
   })
   return { data, error }
+}
+
+// ---- schools ------------------------------------------------------------
+export async function fetchSchools() {
+  if (!supabase) return { data: [], error: new Error('Not configured') }
+  const { data, error } = await supabase.from('schools').select('id, name, aliases').order('name')
+  return { data: data || [], error }
+}
+
+export async function adminAddSchool(name, aliases, password) {
+  if (!supabase) return { error: new Error('Not configured') }
+  const { error } = await supabase.rpc('admin_add_school', {
+    p_name: name, p_aliases: aliases || [], p_password: (password || '').trim(),
+  })
+  return { error }
+}
+
+export async function adminDeleteSchool(id, password) {
+  if (!supabase) return { error: new Error('Not configured') }
+  const { error } = await supabase.rpc('admin_delete_school', { p_id: id, p_password: (password || '').trim() })
+  return { error }
+}
+
+export async function adminSetSchool(name, school, password) {
+  if (!supabase) return { error: new Error('Not configured') }
+  const { error } = await supabase.rpc('admin_set_school', { p_name: name, p_school: school || '', p_password: (password || '').trim() })
+  return { error }
 }
 
 // ---- suggestions / feedback ---------------------------------------------
@@ -129,13 +157,14 @@ export async function adminDeleteName(name, challengeId, password) {
   return { error }
 }
 
-export async function adminAddScore({ displayName, score, challengeId, language }, password) {
+export async function adminAddScore({ displayName, score, challengeId, language, school }, password) {
   if (!supabase) return { error: new Error('Not configured') }
   const { error } = await supabase.rpc('admin_add_score', {
     p_display_name: displayName,
     p_score: score,
     p_challenge_id: challengeId || null,
     p_language: language || 'zulu',
+    p_school: school || null,
     p_password: (password || '').trim(),
   })
   return { error }

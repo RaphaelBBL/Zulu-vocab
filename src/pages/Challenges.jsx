@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useVocab } from '../context/VocabContext'
 import {
   fetchChallenges, createChallenge, adminDeleteChallenge,
-  verifyAdmin, isSupabaseConfigured,
+  isSupabaseConfigured,
 } from '../lib/supabase'
 import { pdfToText, extractPairs } from '../lib/extract'
 import Leaderboard from './Leaderboard'
@@ -112,55 +112,14 @@ export default function Challenges() {
   )
 }
 
-// ---------- admin unlock bar (server-verified password) ----------
+// ---------- admin create bar (sign-in lives on the Admin tab) ----------
 function AdminBar({ onCreate }) {
-  const { isAdmin, setAdminPassword, clearAdmin } = useVocab()
-  const [open, setOpen] = useState(false)
-  const [pw, setPw] = useState('')
-  const [busy, setBusy] = useState(false)
-  const [wrong, setWrong] = useState(false)
-
-  if (isAdmin) {
-    return (
-      <div className="row between owner-bar mb">
-        <span className="small">Admin mode — you can add and remove challenges, and moderate the leaderboards.</span>
-        <div className="row" style={{ gap: 8 }}>
-          <button className="btn sm" onClick={onCreate}>Add notes file</button>
-          <button className="btn sm subtle" onClick={clearAdmin}>Lock</button>
-        </div>
-      </div>
-    )
-  }
-
-  async function tryUnlock() {
-    setBusy(true); setWrong(false)
-    const ok = await verifyAdmin(pw)
-    setBusy(false)
-    if (ok) setAdminPassword(pw.trim())
-    else setWrong(true)
-  }
-
+  const { isAdmin } = useVocab()
+  if (!isAdmin) return null
   return (
-    <div className="mb">
-      {!open ? (
-        <button className="btn sm subtle" onClick={() => setOpen(true)}>Admin sign in</button>
-      ) : (
-        <div className="card">
-          <label>Admin password</label>
-          <div className="row" style={{ gap: 8 }}>
-            <input
-              className="spread" type="password" value={pw}
-              onChange={(e) => { setPw(e.target.value); setWrong(false) }}
-              onKeyDown={(e) => { if (e.key === 'Enter') tryUnlock() }}
-              placeholder="Enter admin password"
-            />
-            <button className="btn" onClick={tryUnlock} disabled={busy || !pw.trim()}>
-              {busy ? '…' : 'Unlock'}
-            </button>
-          </div>
-          {wrong && <p className="feedback bad small mt">That password isn't right.</p>}
-        </div>
-      )}
+    <div className="row between owner-bar mb">
+      <span className="small">Admin mode — add a challenge from a notes file.</span>
+      <button className="btn sm" onClick={onCreate}>Add notes file</button>
     </div>
   )
 }

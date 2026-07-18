@@ -199,7 +199,7 @@ export function QuizRunner({ questions, onAnswer, onFinish, onQuit }) {
 // ---------- results ----------
 export function Results({ result, modeLabel, category, challengeId, challengeName, language, onAgain, onLeaderboard }) {
   const { correct, total, accuracy, score, perfect, answers } = result
-  const { displayName, setDisplayName, language: appLanguage } = useVocab()
+  const { displayName, setDisplayName, language: appLanguage, school } = useVocab()
   const [name, setName] = useState(displayName || '')
   const [status, setStatus] = useState('idle')
   const wrongs = answers.filter((a) => !a.correct)
@@ -216,6 +216,7 @@ export function Results({ result, modeLabel, category, challengeId, challengeNam
       accuracy,
       challengeId,
       language: language || appLanguage,
+      school,
     })
     setStatus(error ? 'error' : 'sent')
   }

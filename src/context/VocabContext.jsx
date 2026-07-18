@@ -79,6 +79,7 @@ export function VocabProvider({ children }) {
   const [allVideos, setAllVideos] = useState(initVideos)
   const [progress, setProgress] = useState(initProgress)
   const [displayName, setDisplayNameState] = useState(() => load('displayName', ''))
+  const [school, setSchoolState] = useState(() => load('school', ''))
   const [adminPassword, setAdminPasswordState] = useState(() => load('adminPassword', ''))
 
   useEffect(() => save('language', language), [language])
@@ -87,6 +88,7 @@ export function VocabProvider({ children }) {
   useEffect(() => save('videos', allVideos), [allVideos])
   useEffect(() => save('progress', progress), [progress])
   useEffect(() => save('displayName', displayName), [displayName])
+  useEffect(() => save('school', school), [school])
   useEffect(() => save('adminPassword', adminPassword), [adminPassword])
 
   // current-language views
@@ -205,6 +207,7 @@ export function VocabProvider({ children }) {
   function resetProgress() { setProgress({ ...EMPTY_PROGRESS }) }
 
   function setDisplayName(name) { setDisplayNameState((name || '').trim().slice(0, 24)) }
+  function setSchool(s) { setSchoolState((s || '').trim().slice(0, 60)) }
   function setAdminPassword(pw) { setAdminPasswordState(pw || '') }
   function clearAdmin() { setAdminPasswordState('') }
 
@@ -241,6 +244,7 @@ export function VocabProvider({ children }) {
     words, categories, videos,
     progress, accuracy, masteryByCategory, troubleWords,
     displayName, setDisplayName,
+    school, setSchool,
     adminPassword, isAdmin: !!adminPassword, setAdminPassword, clearAdmin,
     addWord, updateWord, deleteWord, importWords,
     addCategory, deleteCategory, restoreStarter,

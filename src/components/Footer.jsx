@@ -1,8 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useVocab } from '../context/VocabContext'
-import {
-  submitFeedback, adminListFeedback, adminDeleteFeedback, isSupabaseConfigured,
-} from '../lib/supabase'
+import { submitFeedback, isSupabaseConfigured } from '../lib/supabase'
 
 export default function Footer() {
   const [open, setOpen] = useState(false)
@@ -16,21 +14,10 @@ export default function Footer() {
 }
 
 function FeedbackModal({ onClose }) {
-  const { displayName, isAdmin, adminPassword } = useVocab()
+  const { displayName } = useVocab()
   const [name, setName] = useState(displayName || '')
   const [message, setMessage] = useState('')
   const [status, setStatus] = useState('idle') // idle | sending | sent | error
-  const [list, setList] = useState([])
-  const [loadingList, setLoadingList] = useState(false)
-
-  async function loadList() {
-    if (!isAdmin) return
-    setLoadingList(true)
-    const { data } = await adminListFeedback(adminPassword)
-    setList(data)
-    setLoadingList(false)
-  }
-  useEffect(() => { loadList() }, [])
 
   async function send() {
     if (!message.trim()) return
@@ -38,12 +25,6 @@ function FeedbackModal({ onClose }) {
     const { error } = await submitFeedback({ name, message })
     if (error) { setStatus('error'); return }
     setStatus('sent'); setMessage('')
-    if (isAdmin) loadList()
-  }
-
-  async function remove(id) {
-    const { error } = await adminDeleteFeedback(id, adminPassword)
-    if (!error) setList((prev) => prev.filter((f) => f.id !== id))
   }
 
   return (
@@ -52,7 +33,7 @@ function FeedbackModal({ onClose }) {
         <h2>Suggestions & ideas</h2>
         <p className="subtitle">
           Got an idea, a word list to add, or a comment? Send it through — it goes
-          straight to the person running the app.
+          straight to the person running the app. (Only they can read it.)
         </p>
 
         {!isSupabaseConfigured ? (
@@ -76,28 +57,6 @@ function FeedbackModal({ onClose }) {
             </button>
             {status === 'error' && <p className="feedback bad small mt">Couldn't send. Check your connection and try again.</p>}
           </>
-        )}
-
-        {/* Admin-only inbox */}
-        {isAdmin && (
-          <div className="mt">
-            <div className="row between">
-              <h2 style={{ margin: '18px 0 8px' }}>Inbox ({list.length})</h2>
-              <button className="btn sm subtle" onClick={loadList}>Refresh</button>
-            </div>
-            {loadingList && <div className="empty">Loading…</div>}
-            {!loadingList && list.length === 0 && <div className="empty">No suggestions yet.</div>}
-            {list.map((f) => (
-              <div key={f.id} className="card mb" style={{ padding: 12 }}>
-                <div className="row between">
-                  <b style={{ fontSize: '0.9rem' }}>{f.name || 'Anonymous'}</b>
-                  <button className="icon-btn" title="Delete" onClick={() => remove(f.id)}>✕</button>
-                </div>
-                <div style={{ whiteSpace: 'pre-wrap', marginTop: 4 }}>{f.message}</div>
-                <div className="small muted mt">{new Date(f.created_at).toLocaleString()}</div>
-              </div>
-            ))}
-          </div>
         )}
 
         <div className="row" style={{ justifyContent: 'flex-end', marginTop: 14 }}>

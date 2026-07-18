@@ -6,6 +6,7 @@ import Quiz from './pages/Quiz'
 import Challenges from './pages/Challenges'
 import Videos from './pages/Videos'
 import Leaderboard from './pages/Leaderboard'
+import Admin from './pages/Admin'
 import NameModal from './components/NameModal'
 import Footer from './components/Footer'
 
@@ -16,6 +17,7 @@ const TABS = [
   { id: 'challenges', label: 'Files', ico: 'file' },
   { id: 'videos', label: 'Videos', ico: 'play' },
   { id: 'leaderboard', label: 'Ranks', ico: 'trophy' },
+  { id: 'admin', label: 'Admin', ico: 'shield' },
 ]
 
 const ICON = {
@@ -25,6 +27,7 @@ const ICON = {
   file: 'M6 2h8l4 4v14a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2zM14 2v4h4',
   play: 'M4 4h16v12H4zM10 8l5 3-5 3V8zM8 20h8',
   trophy: 'M7 4h10v3a5 5 0 01-10 0V4zM7 6H4v1a3 3 0 003 3M17 6h3v1a3 3 0 01-3 3M9 15h6l1 5H8z',
+  shield: 'M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z',
 }
 
 function TabIcon({ name }) {
@@ -82,6 +85,7 @@ export default function App() {
         {tab === 'challenges' && <Challenges />}
         {tab === 'videos' && <Videos />}
         {tab === 'leaderboard' && <Leaderboard />}
+        {tab === 'admin' && <Admin go={go} />}
         <Footer />
       </main>
 
